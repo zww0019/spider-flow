@@ -19,25 +19,6 @@ pipeline {
 				}
 			}
 		}
-        stage('maven打包') {
-            agent {
-                docker {
-                reuseNode true
-                	image 'maven'
-                	args '-v /appdata/jenkins_data/maven_repository/.m2:/root/.m2'
-                }
-            }
-            steps {
-                sh 'mvn clean package -f pom.xml -Dmaven.test.skip=true'
-            }
-        }
-       	stage('准备Dockerfile'){
-       	    options { skipDefaultCheckout() }
-       	    steps {
-       	         sh 'cp spider-flow-web/target/spider-flow-0.5.0.jar dockerfile/'
-       	    }
-
-       	}
         stage('构建镜像') {
              options { skipDefaultCheckout() }
              steps {
