@@ -174,7 +174,6 @@
 	</dependencyManagement>
 	<modules>
 		<module>spider-flow-api</module>
-		<module>spider-flow-selenium</module>
 		<module>spider-flow-core</module>
 		<module>spider-flow-web</module>
 	</modules>

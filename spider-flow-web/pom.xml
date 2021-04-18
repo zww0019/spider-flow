@@ -17,11 +17,6 @@
 			<groupId>org.spiderflow</groupId>
 			<artifactId>spider-flow-core</artifactId>
 		</dependency>
-		<!-- 引入selenium插件 -->
-		<dependency>
-			<groupId>org.spiderflow</groupId>
-			<artifactId>spider-flow-selenium</artifactId>
-		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
