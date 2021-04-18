@@ -11,7 +11,7 @@ COPY . .
 RUN mvn clean package
 
 
-FROM openjdk:8-jdk-alpine
+FROM markhobson/maven-chrome:jdk-8
 
 COPY --from=build /usr/src/app/spider-flow-web/target/spider-flow.jar .
 
