@@ -5,7 +5,7 @@ RUN apk add --no-cache tzdata \
     && echo "Asia/Shanghai" > /etc/timezone
 ENV TZ Asia/Shanghai
 
-ADD target/spider-flow.jar /app.jar
+ADD spider-flow-web/target/spider-flow.jar /app.jar
 
 
 ENTRYPOINT ["sh","-c","java -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/usr/local/app/oom -jar /app.jar"]
