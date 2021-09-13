@@ -1,20 +1,11 @@
-#FROM maven:3.6.1-jdk-8-alpine AS build
-# https://github.com/nekolr/maven-image/tree/master/3.6.1-jdk-8
-FROM nekolr/maven:3.6.1 AS build
+FROM openjdk:8-jdk
+LABEL maintainer="zww 1103193859@qq.com"
+RUN apk add --no-cache tzdata \
+    && ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && echo "Asia/Shanghai" > /etc/timezone
+ENV TZ Asia/Shanghai
 
-RUN mkdir -p /usr/src/app
-
-WORKDIR /usr/src/app
-
-COPY . .
-
-RUN mvn clean package
+ADD target/spider-flow.jar /app.jar
 
 
-FROM openjdk:8-jdk-alpine
-
-COPY --from=build /usr/src/app/spider-flow-web/target/spider-flow.jar .
-
-EXPOSE 8088
-
-CMD java -jar spider-flow.jar
+ENTRYPOINT ["sh","-c","java -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/usr/local/app/oom -jar /app.jar"]
