@@ -1,9 +1,5 @@
 FROM openjdk:8-jdk
 LABEL maintainer="zww 1103193859@qq.com"
-RUN apk add --no-cache tzdata \
-    && ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
-    && echo "Asia/Shanghai" > /etc/timezone
-ENV TZ Asia/Shanghai
 
 ADD spider-flow-web/target/spider-flow.jar /app.jar
 
