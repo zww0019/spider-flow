@@ -57,6 +57,7 @@ podTemplate(
 	    envVar(key: 'app_name',value: app_name),
 	    envVar(key: 'deployment_file',value: deployment_file),
 	    envVar(key: 'deployment_name',value: deployment_name),
+	    envVar(key: 'service_file',value: service_file),
 	    envVar(key: 'image_tag',value: img_tag)
 	],
 	volumes: [
