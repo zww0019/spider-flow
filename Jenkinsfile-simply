@@ -1,0 +1,58 @@
+def createAppName() {
+    return 'spiderflow'
+}
+def createVersion() {
+    // 定义一个版本号作为当次构建的版本，输出结果 20191210175842_69
+    return new Date().format('yyyyMMddHHmmss') + "_${env.BUILD_ID}"
+}
+pipeline {
+    agent any
+    environment {
+        _version = createVersion()
+        _appName = createAppName()
+        DOCKERHUB_CREDENTIALS=credentials('dockerhub')
+    }
+    stages {
+        stage('Build') {
+            agent {
+                docker {
+                   image 'maven:3.8-openjdk-8'
+                   args '-v /var/jenkins_home/.m2:/var/jenkins_home/.m2 -u 0:0'
+                   reuseNode true
+                }
+            }
+            steps {
+                sh 'mvn clean install -f pom.xml -Dmaven.test.skip=true'
+            }
+        }
+        stage('Image'){
+            steps {
+                sh 'docker build -f ./usercenter/usercenter-server/dockerfile/Dockerfile -t xiemu/${_appName}:$_version .'
+            }
+        }
+        stage('Login'){
+            steps {
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+            }
+        }
+        stage('Push'){
+            steps {
+                sh 'docker push xiemu/${_appName}:$_version'
+            }
+        }
+        stage('Deploy'){
+            steps {
+                 withKubeConfig([credentialsId: 'kubernetes',serverUrl: 'https://master.zwwpc.top:6443']) {
+                     sh 'curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"'
+                     sh 'chmod u+x ./kubectl'
+                     sh './kubectl set image deployment ${_appName} ${_appName}=xiemu/${_appName}:$_version'
+                 }
+            }
+        }
+    }
+    post {
+        always {
+            sh 'docker rmi xiemu/${_appName}:$_version'
+        }
+    }
+}
