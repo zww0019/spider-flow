@@ -27,7 +27,7 @@ pipeline {
         }
         stage('Image'){
             steps {
-                sh 'docker build -f ./usercenter/usercenter-server/dockerfile/Dockerfile -t xiemu/${_appName}:$_version .'
+                sh 'docker build -f ./spider-flow-web/Dockerfile -t xiemu/${_appName}:$_version .'
             }
         }
         stage('Login'){
