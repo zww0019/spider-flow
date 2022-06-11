@@ -17,12 +17,12 @@ pipeline {
             agent {
                 docker {
                    image 'maven:3.8-openjdk-8'
-                   args '-v /var/jenkins_home/.m2:/var/jenkins_home/.m2 -u 0:0'
+                   args '-e MAVEN_CONFIG=/var/jenkins_home/.m2 '
                    reuseNode true
                 }
             }
             steps {
-                sh 'mvn clean install -f pom.xml -Dmaven.test.skip=true'
+                sh 'mvn clean install -f pom.xml -Duser.home=/var/jenkins_home -Dmaven.test.skip=true'
             }
         }
         stage('Image'){
