@@ -25,34 +25,41 @@ pipeline {
                 sh 'mvn clean install -f pom.xml -Duser.home=/var/jenkins_home -Dmaven.test.skip=true'
             }
         }
-        stage('Image'){
+        stage('copy'){
             steps {
-                sh 'docker build -f ./spider-flow-web/Dockerfile -t xiemu/${_appName}:$_version .'
+                sshPublisher(
+    publishers: [
+      sshPublisherDesc(
+        configName: 'maxvssh',
+        transfers: [
+          sshTransfer(
+            cleanRemote: true,
+            excludes: '',
+            execCommand: """
+                docker build -f jenkins_workspace/$_appName/Dockerfile -t xiemu/${_appName}:$_version jenkins_workspace/$_appName
+                echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
+                docker push xiemu/${_appName}:$_version
+                docker service update --image xiemu/${_appName}:$_version microsoft_${_appName}
+                docker rmi xiemu/${_appName}:$_version
+            """,
+            execTimeout: 0,
+            flatten: false,
+            makeEmptyDirs: false,
+            noDefaultExcludes: false,
+            patternSeparator: '[, ]+',
+            remoteDirectory: "/jenkins_workspace/$_appName",
+            remoteDirectorySDF: false,
+            removePrefix: "spider-flow-web/",
+            sourceFiles: "spider-flow-web/target/*.jar,spider-flow-web/Dockerfile"
+          )
+        ],
+        usePromotionTimestamp: false,
+        useWorkspaceInPromotion: false,
+        verbose: true
+      )
+    ]
+  )
             }
-        }
-        stage('Login'){
-            steps {
-                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-            }
-        }
-        stage('Push'){
-            steps {
-                sh 'docker push xiemu/${_appName}:$_version'
-            }
-        }
-        stage('Deploy'){
-            steps {
-                 withKubeConfig([credentialsId: 'kubernetes',serverUrl: 'https://master.zwwpc.top:6443']) {
-                     sh 'curl -LO "https://storage.googleapis.com/kubernetes-release/release/v1.20.5/bin/linux/amd64/kubectl"'
-                     sh 'chmod u+x ./kubectl'
-                     sh './kubectl set image deployment ${_appName} ${_appName}=xiemu/${_appName}:$_version'
-                 }
-            }
-        }
-    }
-    post {
-        always {
-            sh 'docker rmi xiemu/${_appName}:$_version'
         }
     }
 }
